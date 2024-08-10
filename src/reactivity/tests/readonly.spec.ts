@@ -12,7 +12,7 @@ describe("readonly", () => {
     expect(wrapped.foo).toBe(1);
   });
 
-  it("should not be edit", () => {
+  it("should call console.warn when set value", () => {
     console.warn = jest.fn();
     const obj = readonly({ foo: 1 });
     obj.foo = 10;
