@@ -13,4 +13,5 @@ describe("shallReadonly", () => {
     obj.foo = 10;
     expect(console.warn).toHaveBeenCalled();
   });
+
 });
