@@ -3,7 +3,7 @@ import { isReactive } from "./reactive";
 
 let activeEffect;
 let shouldTrack;
-class ReactiveEffect {
+export class ReactiveEffect {
   deps = [];
   private _fn: any;
   onStop?: () => void;
