@@ -1,4 +1,5 @@
 import { isObject } from "../shared";
+import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 
 /**
@@ -16,9 +17,10 @@ export function renderer(vnode, container) {
  * @param container 要挂载的根元素
  */
 function patch(vnode, container) {
-  if (typeof vnode.type === "string") {
+  const { shapeFlag } = vnode;
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     processElement(vnode, container);
-  } else if (isObject(vnode.type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     processComponent(vnode, container);
   }
 }
@@ -33,10 +35,10 @@ function processElement(vnode: any, container) {
 
 function mountElement(initialVnode, container: HTMLElement) {
   const el = (initialVnode.el = document.createElement("div"));
-  const { children, props } = initialVnode;
-  if (typeof children === "string") {
+  const { children, props, shapeFlag } = initialVnode;
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(initialVnode, el);
   }
   if (props) {
@@ -67,5 +69,5 @@ function setupRenderEffect(instance, container, vnode) {
   const { proxy } = instance;
   const subTree = instance.render.call(proxy);
   patch(subTree, container);
-  vnode.el = subTree.el
+  vnode.el = subTree.el;
 }
