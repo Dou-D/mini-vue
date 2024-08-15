@@ -1,6 +1,4 @@
 import { ReactiveEffect } from "./effect";
-import { isReactive } from "./reactive";
-
 class ComputedRefImpl {
   private _getter: () => any;
   private _value;

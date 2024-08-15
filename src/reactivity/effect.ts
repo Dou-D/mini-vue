@@ -1,7 +1,7 @@
-import { extend } from "../shared";
+import { extend } from "../shared"
 import { isReactive } from "./reactive";
 
-let activeEffect;
+let activeEffect; // 当前的副作用函数
 let shouldTrack;
 export class ReactiveEffect {
   deps = [];
