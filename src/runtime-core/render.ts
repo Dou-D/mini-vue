@@ -29,8 +29,16 @@ function patchProps(el, key, val) {
   el.setAttribute(key, val);
 }
 
+function patchEvent(el: HTMLElement, type, listener) {
+  el.addEventListener(type, listener);
+}
+
 function processElement(vnode: any, container) {
   mountElement(vnode, container);
+}
+
+function isOn(key: string) {
+  return /^on[A-Z]/.test(key);
 }
 
 function mountElement(initialVnode, container: HTMLElement) {
@@ -43,7 +51,13 @@ function mountElement(initialVnode, container: HTMLElement) {
   }
   if (props) {
     for (const key in props) {
-      patchProps(el, key, props[key]);
+      const val = props[key];
+      if (isOn(key)) {
+        const type = key.slice(2).toLowerCase();
+        patchEvent(el, type, val)
+      } else {
+        patchProps(el, key, val);
+      }
     }
   }
   container.append(el);

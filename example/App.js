@@ -6,9 +6,15 @@ export const App = {
         window.self = this 
         return h("div", {
             id: "root",
-            class: ["red", "hard"]
+            class: ["red", "hard"],
+            onClick() {
+                console.log("click");
+            },
+            onMouseenter() {
+                console.log("mouse");
+            }
         },
-            "hello " + this.msg
+        "hello " + this.msg
         )
     },
 
