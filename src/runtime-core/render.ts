@@ -41,6 +41,21 @@ function isOn(key: string) {
   return /^on[A-Z]/.test(key);
 }
 
+function convertProps(rootVnode, rawProps) {
+  if (!rawProps) {
+    return;
+  }
+  for (const key in rawProps) {
+    const val = rawProps[key];
+    if (isOn(key)) {
+      const type = key.slice(2).toLowerCase();
+      patchEvent(rootVnode, type, val);
+    } else {
+      patchProps(rootVnode, key, val);
+    }
+  }
+}
+
 function mountElement(initialVnode, container: HTMLElement) {
   const el = (initialVnode.el = document.createElement("div"));
   const { children, props, shapeFlag } = initialVnode;
@@ -49,17 +64,7 @@ function mountElement(initialVnode, container: HTMLElement) {
   } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(initialVnode, el);
   }
-  if (props) {
-    for (const key in props) {
-      const val = props[key];
-      if (isOn(key)) {
-        const type = key.slice(2).toLowerCase();
-        patchEvent(el, type, val)
-      } else {
-        patchProps(el, key, val);
-      }
-    }
-  }
+  convertProps(el, props)
   container.append(el);
 }
 
