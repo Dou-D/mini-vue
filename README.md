@@ -20,3 +20,9 @@ export default {
 }
 
 ```
+## bind
+```js
+instance.emit = emit.bind(null, instance);
+```
+这段代码在instance上创建一个新的函数emit，当调用instance.emit时——instance.emit(),其实调用的是emit,并且把instance当做第一个参数自动传递——emit(instance)。  
+instance.emit("onClick")本质上是emit(instance, "onClick")  
