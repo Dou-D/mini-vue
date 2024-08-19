@@ -1,5 +1,7 @@
 import { ShapeFlags } from "../shared/shapeFlags";
 
+export const Fragment = Symbol("Fragment")
+
 export function createVNode(type, props?, children?) {
   const vnode = {
     type,
@@ -13,6 +15,12 @@ export function createVNode(type, props?, children?) {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   } else if (Array.isArray(children)) {
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
+  }
+  // children是object,并且type是组件时才触发slot
+  if(vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    if(typeof children === "object") {
+      vnode.shapeFlag |= ShapeFlags.SLOT_CHILDREN
+    }
   }
 
   return vnode;
