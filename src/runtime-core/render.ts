@@ -7,8 +7,7 @@ import { Fragment, Text } from "./vnode";
 export function createRenderer(options) {
   const {
     createElement,
-    patchProps,
-    patchEvent,
+    patchProps: hostPatchProp,
     insert,
   } = options
   /**
@@ -65,19 +64,12 @@ export function createRenderer(options) {
     return /^on[A-Z]/.test(key);
   }
 
-  function convertProps(rootVnode, rawProps) {
-    if (!rawProps) {
-      return;
-    }
-    for (const key in rawProps) {
-      const val = rawProps[key];
-      if (isOn(key)) {
-        const type = key.slice(2).toLowerCase();
-        patchEvent(rootVnode, type, val);
-      } else {
-        patchProps(rootVnode, key, val);
-      }
-    }
+  function patchEvent(el: HTMLElement, type, listener) {
+    el.addEventListener(type, listener);
+  }
+
+  function patchProps(el, key, val) {
+    hostPatchProp(el, key, val)
   }
 
   function mountElement(initialVnode, container: HTMLElement, parent) {
@@ -90,7 +82,15 @@ export function createRenderer(options) {
       mountChildren(initialVnode, el, parent);
     }
     // props
-    convertProps(el, props);
+    for (const key in props) {
+      const val = props[key];
+      if (isOn(key)) {
+        const type = key.slice(2).toLowerCase();
+        patchProps(el, type, val);
+      } else {
+        hostPatchProp(el, key, val);
+      }
+    }
     insert(el, container)
   }
 
