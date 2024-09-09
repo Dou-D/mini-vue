@@ -4,12 +4,12 @@ window.self = null
 export const App = {
     render() {
         window.self = this
-        return h("div", {
+        return h("span", {
             id: "root",
             class: ["red", "hard"],
         },
             [
-                h("div", {}, "hi" + this.msg),
+                h("span", {}, "hi" + this.msg),
                 h(Foo, { count: 1 })
             ]
         )

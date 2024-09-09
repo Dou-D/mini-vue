@@ -4,7 +4,7 @@ export const Foo = {
   setup(props, { emit }) {
     const emitAdd = () => {
       console.log("emit add");
-      emit("add-foo")
+      // emit("add-foo")
     };
     return {
       emitAdd,

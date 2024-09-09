@@ -5,7 +5,7 @@ export const App = {
     name: "App",
     render() {
         return h("div", {}, [h("div", {}, "App"), h(Foo, {
-            onAdd(a,b) {
+            onAdd(a, b) {
                 console.log("onAdd", a, b);
             },
             onAddFoo() {

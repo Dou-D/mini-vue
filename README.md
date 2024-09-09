@@ -20,9 +20,52 @@ export default {
 }
 
 ```
+
 ## bind
+
 ```js
 instance.emit = emit.bind(null, instance);
 ```
-这段代码在instance上创建一个新的函数emit，当调用instance.emit时——instance.emit(),其实调用的是emit,并且把instance当做第一个参数自动传递——emit(instance)。  
-instance.emit("onClick")本质上是emit(instance, "onClick")  
+
+这段代码在 instance 上创建一个新的函数 emit，当调用 instance.emit 时——instance.emit(),其实调用的是 emit,并且把 instance 当做第一个参数自动传递——emit(instance)。  
+instance.emit("onClick")本质上是 emit(instance, "onClick")
+
+TODO: 
+```ts
+// renderer/mountComponent
+function mountComponent(vnode: any, container, parent) {
+  const instance = createComponentInstance(vnode, parent);
+  setupComponent(instance);
+  setupRenderEffect(instance, container, vnode);
+}
+```
+
+TODO:
+```ts
+// renderer/setupRenderEffect
+  function setupRenderEffect(instance, container, vnode) {
+    const { proxy } = instance;
+    const subTree = instance.render.call(proxy);
+    patch(subTree, container, instance);
+    vnode.el = subTree.el;
+  }
+```
+
+```ts
+// component/setupStatefulComponent
+function setupStatefulComponent(instance) {
+  const component = instance.type;
+
+  instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers);
+
+  const { setup } = component;
+  if (setup) {
+    setCurrentInstance(instance)
+    const setupResult = setup(shallowReadonly(instance.props), {
+      emit: instance.emit
+    });
+    setCurrentInstance(null)
+    handleSetupResult(instance, setupResult);
+  }
+}
+```
