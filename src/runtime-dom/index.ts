@@ -14,7 +14,6 @@ function insert(el: HTMLElement, container: HTMLElement) {
 
 function patchEvent(el: HTMLElement, type, listener) {
     el.addEventListener(type, listener);
-
 }
 
 const renderer: any = createRenderer({
