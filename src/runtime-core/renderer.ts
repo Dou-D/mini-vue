@@ -1,4 +1,5 @@
 import { effect } from "../reactivity/effect";
+import { EMPTY_OBJ } from "../shared";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
@@ -11,7 +12,7 @@ import { Fragment, Text } from "./vnode";
 export function createRenderer(options) {
   const {
     createElement: hostCreateElement,
-    patchProps: hostPatchProp,
+    patchProp: hostPatchProp,
     insert
   } = options
   /**
@@ -58,7 +59,7 @@ export function createRenderer(options) {
   function processElement(n1, n2, container, parent) {
     if (!n1) {
       mountElement(n2, container, parent);
-      
+
     } else {
       patchElement(n1, n2, container)
     }
@@ -66,8 +67,33 @@ export function createRenderer(options) {
 
   function patchElement(n1, n2, container) {
     console.log("patchElement");
-    console.log(n1); 
+    console.log(n1);
     console.log(n2)
+    const oldProps = n1.props || EMPTY_OBJ
+    const newProps = n2.props || EMPTY_OBJ
+    const el = (n2.el = n1.el)
+    patchProps(el, oldProps, newProps)
+  }
+
+  function patchProps(el, oldProps, newProps) {
+    if (oldProps !== newProps) {
+      if (oldProps !== null) {
+        for (const key in oldProps) {
+          if (!(key in newProps)) {
+            const prevProp = oldProps[key]
+            hostPatchProp(el, key, prevProp, null)
+          }
+        }
+      }
+      for (const key in newProps) {
+        const prevProp = oldProps[key]
+        const nextProp = newProps[key]
+
+        if (prevProp !== nextProp) {
+          hostPatchProp(el, key, prevProp, nextProp)
+        }
+      }
+    }
   }
 
   function processText(n1, n2, container: HTMLElement) {
@@ -80,21 +106,9 @@ export function createRenderer(options) {
     mountComponent(n2, container, parent);
   }
 
-  function isOn(key: string) {
-    return /^on[A-Z]/.test(key);
-  }
-
-  function patchEvent(el: HTMLElement, type, listener) {
-    el.addEventListener(type, listener);
-  }
-
-  function patchProps(el, key, val) {
-    hostPatchProp(el, key, val)
-  }
-
   function mountElement(vnode, container: HTMLElement, parent) {
     const el = (vnode.el = hostCreateElement(vnode.type));
-    
+
     const { children, props, shapeFlag } = vnode;
     // children
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
@@ -105,12 +119,7 @@ export function createRenderer(options) {
     // props
     for (const key in props) {
       const val = props[key];
-      if (isOn(key)) {
-        const type = key.slice(2).toLowerCase();
-        patchEvent(el, type, val);
-      } else {
-        hostPatchProp(el, key, val);
-      }
+      hostPatchProp(el, key, null, val)
     }
     insert(el, container)
   }
