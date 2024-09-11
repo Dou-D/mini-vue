@@ -55,7 +55,7 @@ export function createRenderer(options) {
 
 
   function processFragment(n1, n2, container, parent) {
-    mountChildren(n2, container, parent);
+    mountChildren(n2.children, container, parent);
   }
 
   function processElement(n1, n2, container, parent) {
@@ -63,11 +63,11 @@ export function createRenderer(options) {
       mountElement(n2, container, parent);
 
     } else {
-      patchElement(n1, n2, container)
+      patchElement(n1, n2, container, parent)
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     console.log("patchElement");
     console.log(n1);
     console.log(n2)
@@ -75,7 +75,7 @@ export function createRenderer(options) {
     const newProps = n2.props || EMPTY_OBJ
     const el = (n2.el = n1.el)
 
-    patchChildren(n1, n2, el)
+    patchChildren(n1, n2, el, parentComponent)
     patchProps(el, oldProps, newProps)
   }
   /**
@@ -84,12 +84,12 @@ export function createRenderer(options) {
    * @param n2 新children
    * @param container el
    */
-  function patchChildren(n1, n2, container) {
+  function patchChildren(n1, n2, container, parentComponent) {
     const prevShapeFlag = n1.shapeFlag
     const { shapeFlag } = n2
     const oldChildren = n1.children
     const newChildren = n2.children
-    // n2是文本节点
+    // Array -> Text n2是文本节点
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       // n1是数组节点
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
@@ -98,6 +98,12 @@ export function createRenderer(options) {
       }
       if (oldChildren !== newChildren) {
         hostSetElementText(container, newChildren)
+      }
+    }else {
+      // Text -> Array
+      if(shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        hostSetElementText(container, "")
+        mountChildren(newChildren, container, parentComponent)
       }
     }
   }
@@ -148,7 +154,7 @@ export function createRenderer(options) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       el.textContent = children;
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-      mountChildren(vnode, el, parent);
+      mountChildren(vnode.children, el, parent);
     }
     // props
     for (const key in props) {
@@ -158,8 +164,8 @@ export function createRenderer(options) {
     insert(el, container)
   }
 
-  function mountChildren(vnode, container: HTMLElement, parent) {
-    vnode.children.forEach((v) => {
+  function mountChildren(children, container: HTMLElement, parent) {
+    children.forEach((v) => {
       patch(null, v, container, parent);
     });
   }
