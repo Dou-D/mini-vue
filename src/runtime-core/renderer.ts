@@ -13,6 +13,8 @@ export function createRenderer(options) {
   const {
     createElement: hostCreateElement,
     patchProp: hostPatchProp,
+    remove: hostRemove,
+    setElementText: hostSetElementText,
     insert
   } = options
   /**
@@ -72,7 +74,39 @@ export function createRenderer(options) {
     const oldProps = n1.props || EMPTY_OBJ
     const newProps = n2.props || EMPTY_OBJ
     const el = (n2.el = n1.el)
+
+    patchChildren(n1, n2, el)
     patchProps(el, oldProps, newProps)
+  }
+  /**
+   * 页面元素变化`<el>children</el>`
+   * @param n1 旧children
+   * @param n2 新children
+   * @param container el
+   */
+  function patchChildren(n1, n2, container) {
+    const prevShapeFlag = n1.shapeFlag
+    const { shapeFlag } = n2
+    const oldChildren = n1.children
+    const newChildren = n2.children
+    // n2是文本节点
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      // n1是数组节点
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        unmountChildren(n1.children)
+        hostSetElementText(container, newChildren)
+      }
+      if (oldChildren !== newChildren) {
+        hostSetElementText(container, newChildren)
+      }
+    }
+  }
+
+  function unmountChildren(children) {
+    for (const element of children) {
+      const el = element.el
+      hostRemove(el)
+    }
   }
 
   function patchProps(el, oldProps, newProps) {

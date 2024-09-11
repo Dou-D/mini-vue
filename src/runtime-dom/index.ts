@@ -25,6 +25,13 @@ function patchEvent(el: HTMLElement, type, listener) {
     el.addEventListener(type, listener);
 }
 
+function remove(child) {
+    const parent = child.parentNode
+    if(parent) {
+        parent.removeChild(child)
+    }
+}
+
 function patchAttr(el: HTMLElement, key, val) {
     if (val === null || val === undefined) {
         el.removeAttribute(key)
@@ -33,10 +40,16 @@ function patchAttr(el: HTMLElement, key, val) {
     }
 }
 
+function setElementText(el, text) {
+    el.textContent = text
+}
+
 const renderer: any = createRenderer({
     createElement,
     patchProp,
     insert,
+    remove,
+    setElementText
 })
 
 export function createApp(...args) {
