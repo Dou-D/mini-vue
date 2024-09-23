@@ -69,3 +69,5 @@ function setupStatefulComponent(instance) {
   }
 }
 ```
+## 双端diff
+`patchKeyedChildren`的e1和e2不能跟起始值指针一样同步，Array to Array新旧的长度可能不一样。  

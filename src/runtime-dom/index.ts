@@ -16,9 +16,14 @@ function patchProp(el, key, prevProp, nextProp) {
         patchAttr(el, key, nextProp)
     }
 }
-
-function insert(el: HTMLElement, container: HTMLElement) {
-    container.append(el)
+/**
+ * 
+ * @param child 要插入的节点
+ * @param container 子节点列表
+ * @param anchor 在其之前插入 newNode 的节点。如果为 null，newNode 将被插入到节点的子节点列表末尾
+ */
+function insert(child: HTMLElement, container: HTMLElement, anchor) {
+    container.insertBefore(child,anchor || null)
 }
 
 function patchEvent(el: HTMLElement, type, listener) {
