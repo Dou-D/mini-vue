@@ -114,7 +114,12 @@ export function createRenderer(options) {
     const l2 = c2.length
     let e1 = l1 - 1
     let e2 = l2 - 1
-
+    /**
+     * 判断两个节点是否相同
+     * @param n1 旧节点
+     * @param n2 新节点
+     * @returns boolean
+     */
     function isSomeVNodeType(n1, n2) {
       return n1.type === n2.type && n1.key === n2.key
     }
@@ -146,8 +151,9 @@ export function createRenderer(options) {
     // 解决长度增加问题 左侧相同
     //      A B
     // (D C)A B
+    // 旧的已经遍历完了
     if (i > e1) {
-      // i<=e2说明新child还没遍历完
+      // i<=e2说明新child还没遍历完——即有新节点加入 patch的第一个参数为null
       if (i <= e2) {
         const nextPosition = e2 + 1
         const anchor = nextPosition < l2 ? c2[nextPosition].el : null
@@ -156,10 +162,51 @@ export function createRenderer(options) {
           i++
         }
       }
-    } else if (i > e2) {
+    }
+    // 旧的没遍历完——即有的节点在新节点没有出现了，需要卸载
+    else if (i > e2) {
       while (i <= e1) {
         hostRemove(c1[i].el)
         i++
+      }
+    }
+    // 都没遍历完
+    else {
+      let s1 = i
+      let s2 = i
+      const keyToNewIndexMap = new Map()
+
+      for (let i = s2; i <= e2; i++) {
+        const nextChild = c2[i]
+        keyToNewIndexMap.set(nextChild.key, i)
+      }
+      let patched = 0
+      const toBePatched = e2 - e1 + 1
+      for (let i = s1; i <= e1; i++) {
+        const prevChild = c1[i]
+
+        if (patched >= toBePatched) {
+          hostRemove(prevChild.el)
+          continue;
+        }
+        let newIndex
+        // 用户如果传了key
+        if (prevChild.key != null) {
+          newIndex = keyToNewIndexMap.get(prevChild.key)
+        } else {
+          for (let j = s2; j < e2; j++) {
+            if (isSomeVNodeType(prevChild, c2[j])) {
+              newIndex = j
+              break
+            }
+          }
+        }
+        if (newIndex == undefined) {
+          hostRemove(prevChild.el)
+        } else {
+          patch(prevChild, c2[newIndex], container, parentComponent, null)
+          patched++
+        }
       }
     }
   }

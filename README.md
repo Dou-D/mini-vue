@@ -71,3 +71,7 @@ function setupStatefulComponent(instance) {
 ```
 ## 双端diff
 `patchKeyedChildren`的e1和e2不能跟起始值指针一样同步，Array to Array新旧的长度可能不一样。  
+
+## key的作用
+对比新旧节点的key，相同的情况下可以复用节点，但打补丁操作还是要做的。  
+
